@@ -1,19 +1,16 @@
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 public class AutomationTest {
     private KeywordExecutor executor;
     private ExtentReports extent;
     private ExtentTest test;
 
-    @BeforeClass
+    @Before
     public void setUp() {
         executor = new KeywordExecutor();
-
+        
         // Initialize ExtentReports
         ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter("test-output/ExtentReport.html");
         extent = new ExtentReports();
@@ -23,7 +20,7 @@ public class AutomationTest {
     @Test
     public void testLogin() {
         test = extent.createTest("testLogin");
-
+        
         try {
             test.info("Opening browser");
             executor.execute("OPEN_BROWSER");
@@ -48,9 +45,10 @@ public class AutomationTest {
         }
     }
 
-    @AfterClass
+    @After
     public void tearDown() {
-        executor.closeBrowser();
+        // Close the browser or cleanup resources
+        executor.close(); // Implement cleanup in your KeywordExecutor
         extent.flush(); // Write everything to the report
     }
 }
