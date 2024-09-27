@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+}
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Selenium Java
+    implementation 'org.seleniumhq.selenium:selenium-java:4.0.0' // Use the latest version
+
+    // TestNG
+    testImplementation 'org.testng:testng:7.4.0' // Use the latest version
+
+    // ExtentReports for reporting
+    testImplementation 'com.aventstack:extentreports:5.0.9' // Use the latest version
+}
+
+test {
+    useTestNG()
+}
