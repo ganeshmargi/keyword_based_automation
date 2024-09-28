@@ -1,54 +1,73 @@
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AutomationTest {
     private KeywordExecutor executor;
     private ExtentReports extent;
     private ExtentTest test;
 
-    @Before
+    @BeforeClass
     public void setUp() {
         executor = new KeywordExecutor();
-        
-        // Initialize ExtentReports
         ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter("test-output/ExtentReport.html");
         extent = new ExtentReports();
         extent.attachReporter(htmlReporter);
     }
 
-    @Test
-    public void testLogin() {
-        test = extent.createTest("testLogin");
+    @DataProvider(name = "excelDataProvider")
+    public Object[][] excelDataProvider() throws IOException {
+        ExcelUtil excelUtil = new ExcelUtil("path/to/your/testcases.xlsx");
+        List<String[]> data = excelUtil.readTestData("TestCases"); // Adjust sheet name accordingly
+
+        // Group keywords by Test Case ID
+        Map<String, List<String[]>> testCaseMap = new HashMap<>();
+        for (String[] row : data) {
+            String testCaseId = row[0];
+            testCaseMap.putIfAbsent(testCaseId, new ArrayList<>());
+            testCaseMap.get(testCaseId).add(row);
+        }
+
+        // Convert the map to a 2D array
+        List<Object[]> testCases = new ArrayList<>();
+        for (Map.Entry<String, List<String[]>> entry : testCaseMap.entrySet()) {
+            testCases.add(new Object[]{entry.getKey(), entry.getValue()});
+        }
+        
+        return testCases.toArray(new Object[0][]);
+    }
+
+    @Test(dataProvider = "excelDataProvider")
+    public void testKeywordDriven(String testCaseId, List<String[]> keywords) {
+        test = extent.createTest("Executing Test Case ID: " + testCaseId);
         
         try {
-            test.info("Opening browser");
-            executor.execute("OPEN_BROWSER");
-            test.pass("Browser opened successfully");
-
-            test.info("Entering username");
-            executor.execute("ENTER_TEXT", "usernameField", "myUsername");
-            test.pass("Username entered successfully");
-
-            test.info("Entering password");
-            executor.execute("ENTER_TEXT", "passwordField", "myPassword");
-            test.pass("Password entered successfully");
-
-            test.info("Clicking login button");
-            executor.execute("CLICK_BUTTON", "loginButton");
-            test.pass("Login button clicked successfully");
-
-            // Add assertions to validate the outcome
-            test.pass("Test completed successfully");
+            for (String[] keywordData : keywords) {
+                String keyword = keywordData[1];
+                String param1 = keywordData[2];
+                String param2 = keywordData[3];
+                executor.execute(keyword, param1, param2);
+                test.info("Executed keyword: " + keyword);
+            }
+            test.pass("All steps executed successfully for Test Case ID: " + testCaseId);
         } catch (Exception e) {
-            test.fail("Test failed: " + e.getMessage());
+            test.fail("Execution failed for Test Case ID: " + testCaseId + ": " + e.getMessage());
         }
     }
 
-    @After
+    @AfterClass
     public void tearDown() {
-        // Close the browser or cleanup resources
-        executor.close(); // Implement cleanup in your KeywordExecutor
-        extent.flush(); // Write everything to the report
+        executor.closeBrowser();
+        extent.flush();
     }
 }
