@@ -2,24 +2,31 @@ plugins {
     id 'java'
 }
 
-group 'com.example'
-version '1.0-SNAPSHOT'
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    // Selenium Java
-    implementation 'org.seleniumhq.selenium:selenium-java:4.0.0' // Use the latest version
-
-    // TestNG
-    testImplementation 'org.testng:testng:7.4.0' // Use the latest version
-
+    // Selenium dependencies
+    implementation 'org.seleniumhq.selenium:selenium-java:4.20.0'
+    
+    // TestNG for testing framework
+    testImplementation 'org.testng:testng:7.7.0'
+    
+    // Apache POI for Excel file handling
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    
     // ExtentReports for reporting
-    testImplementation 'com.aventstack:extentreports:5.0.9' // Use the latest version
+    implementation 'com.aventstack:extentreports:5.0.9'
+    
+    // Logging (optional but recommended)
+    implementation 'org.slf4j:slf4j-api:2.0.7'
+    implementation 'org.slf4j:slf4j-simple:2.0.7'
 }
 
 test {
-    useTestNG()
+    useTestNG() // Use TestNG for running tests
+    testLogging {
+        events "passed", "skipped", "failed" // Log test events
+    }
 }
